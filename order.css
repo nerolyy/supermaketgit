@@ -1,0 +1,179 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+header {
+  background-color: #fff;
+  padding: 1em 2em;
+  border-bottom: 1px solid #ccc;
+}
+
+header a {
+  text-decoration: none;
+  color: #007bff;
+  font-size: 16px;
+}
+
+main {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 2em;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  text-align: center;
+  color: #222;
+  margin-bottom: 1.5em;
+}
+
+form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+  margin-bottom: 1.2em;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+button[type="submit"] {
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+ul li {
+  margin-bottom: 5px;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+p {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+}
+.styled-link {
+  display: inline-block;
+  padding: 10px 18px;
+  margin: 10px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.styled-link.back {
+  background-color: #f2f2f2;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.styled-link.back:hover {
+  background-color: #e0e0e0;
+}
+
+.styled-link.home {
+  background-color: #007bff;
+  color: #fff;
+  border: 1px solid #007bff;
+}
+
+.styled-link.home:hover {
+  background-color: #0056b3;
+}
+input[type="text"],
+input[type="tel"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+  margin-bottom: 1.2em;
+}
+@media (max-width: 768px) {
+  main {
+    margin: 20px 10px;
+    padding: 1.5em;
+  }
+
+  header {
+    padding: 1em;
+    text-align: center;
+  }
+
+  header a {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+
+  input[type="text"],
+  input[type="tel"],
+  textarea {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  button[type="submit"] {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
+  .styled-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 8px 0;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  p {
+    font-size: 16px;
+  }
+}
