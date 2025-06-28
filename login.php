@@ -4,14 +4,12 @@ require_once 'db.php';
 
 $error = '';
 
-// Восстановление сессии из cookie, если сессия отсутствует
 if (!isset($_SESSION['user_id']) && isset($_COOKIE['user_id'])) {
     $_SESSION['user_id'] = $_COOKIE['user_id'];
     $_SESSION['first_name'] = $_COOKIE['first_name'];
     $_SESSION['user_email'] = $_COOKIE['user_email'];
     $_SESSION['role'] = $_COOKIE['user_role'] ?? 'user';
 
-    // Перенаправление в зависимости от роли
     if ($_SESSION['role'] === 'admin') {
         header("Location: admin_lk.php");
     } else {

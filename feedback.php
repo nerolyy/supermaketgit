@@ -1,11 +1,10 @@
 <?php
-// Подключение к базе данных supermarket
+
 $conn = new mysqli("localhost", "root", "", "supermarket");
 if ($conn->connect_error) {
     die("Ошибка подключения: " . $conn->connect_error);
 }
 
-// Обработка формы обратной связи
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = $conn->real_escape_string($_POST['email']);
     $message = $conn->real_escape_string($_POST['message']);
