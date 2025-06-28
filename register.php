@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start();
 require_once('db.php');
 
 $message = '';
@@ -13,8 +13,29 @@ $address = $_POST['address'] ?? '';
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $pass = $_POST['pass'] ?? '';
     $repeatpass = $_POST['repeatpass'] ?? '';
+    $recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
 
-    if (empty($first_name) || empty($last_name) || empty($phone) || empty($email) || empty($pass) || empty($repeatpass) || empty($address)) {
+    // Правильный секретный ключ reCAPTCHA
+    $recaptcha_secret = '6LcmfnArAAAAAHaotlMESSnCnirHNYWpxNhCqEVR';
+    $verify_url = 'https://www.google.com/recaptcha/api/siteverify';
+
+    $data = [
+        'secret' => $recaptcha_secret,
+        'response' => $recaptcha_response
+    ];
+
+    $ch = curl_init($verify_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $captcha_success = json_decode($response);
+
+    if (!$captcha_success->success) {
+        $message = "Подтвердите, что вы не робот.";
+    } elseif (empty($first_name) || empty($last_name) || empty($phone) || empty($email) || empty($pass) || empty($repeatpass) || empty($address)) {
         $message = "Заполните все поля";
     } elseif ($pass !== $repeatpass) {
         $message = "Пароли не совпадают";
@@ -28,8 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("ssssss", $first_name, $last_name, $phone, $email, $hashed_pass, $address);
 
         if ($stmt->execute()) {
-            $_SESSION['user_email'] = $email; 
-            header("Location: lk.php");      
+            $_SESSION['user_email'] = $email;
+            header("Location: lk.php");
             exit();
         } else {
             $message = "Ошибка: " . $stmt->error;
@@ -47,6 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="register.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <header>
   <div class="logo">
@@ -66,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <a href="cart.php"><img src="img/buy.png"/></a>
     </div>
   </nav>
-</header> 
+</header>
 <body>
   <div class="container">
     <div class="left-side">
@@ -107,6 +129,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <label>Адрес</label>
         <input type="text" name="address" value="<?= htmlspecialchars($address) ?>" required>
+
+        <!-- ✅ reCAPTCHA с правильным site key -->
+        <div class="g-recaptcha" data-sitekey="6LcmfnArAAAAAAIs8JjOIdfJSNPW2HbehqisdspN"></div>
 
         <button type="submit">Зарегестрироваться</button>
         <p class="login-link">Уже есть аккаунт? Войдите <a href="login.php">Войти</a></p>
