@@ -15,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $repeatpass = $_POST['repeatpass'] ?? '';
     $recaptcha_response = $_POST['g-recaptcha-response'] ?? '';
 
-    // Правильный секретный ключ reCAPTCHA
     $recaptcha_secret = '6LcmfnArAAAAAHaotlMESSnCnirHNYWpxNhCqEVR';
     $verify_url = 'https://www.google.com/recaptcha/api/siteverify';
 
@@ -130,7 +129,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <label>Адрес</label>
         <input type="text" name="address" value="<?= htmlspecialchars($address) ?>" required>
 
-        <!-- ✅ reCAPTCHA с правильным site key -->
         <div class="g-recaptcha" data-sitekey="6LcmfnArAAAAAAIs8JjOIdfJSNPW2HbehqisdspN"></div>
 
         <button type="submit">Зарегестрироваться</button>
