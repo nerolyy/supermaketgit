@@ -17,6 +17,28 @@ $email = $_SESSION['user_email'];
 $successMessage = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Проверка на выход из аккаунта
+    if (isset($_POST['logout'])) {
+        // Очистка сессии
+        session_unset();
+        session_destroy();
+        
+        // Очистка куки
+        if (isset($_COOKIE['user_email'])) {
+            setcookie('user_email', '', time() - 3600, "/");
+        }
+        if (isset($_COOKIE['user_id'])) {
+            setcookie('user_id', '', time() - 3600, "/");
+        }
+        if (isset($_COOKIE['first_name'])) {
+            setcookie('first_name', '', time() - 3600, "/");
+        }
+        
+        header("Location: mainpage.php");
+        exit();
+    }
+    
+    // Обновление данных профиля
     $newFirst = $_POST['first_name'];
     $newLast = $_POST['last_name'];
     $newPhone = $_POST['phone'];
@@ -136,6 +158,12 @@ if (!$user) {
 
       <button type="button" id="editBtn">Изменить данные профиля</button>
       <button type="submit" id="saveBtn" style="display:none;">Сохранить</button>
+    </form>
+    
+    <form method="post" style="margin-top: 20px;">
+      <button type="submit" name="logout" value="1" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+        <i class="fas fa-sign-out-alt"></i> Выйти из аккаунта
+      </button>
     </form>
   </section>
 </main>

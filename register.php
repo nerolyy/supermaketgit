@@ -27,25 +27,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     $response = curl_exec($ch);
+    $curl_error = curl_error($ch);
     curl_close($ch);
 
-    $captcha_success = json_decode($response);
-
-    if (!$captcha_success->success) {
-        $message = "Подтвердите, что вы не робот.";
-    } elseif (empty($first_name) || empty($last_name) || empty($phone) || empty($email) || empty($pass) || empty($repeatpass) || empty($address)) {
-        $message = "Заполните все поля";
-    } elseif ($pass !== $repeatpass) {
-        $message = "Пароли не совпадают";
-    } elseif (strlen($pass) < 8 || !preg_match('/\d/', $pass)) {
-        $message = "Пароль должен содержать минимум 8 символов и хотя бы одну цифру";
+    // Отладочная информация
+    if ($curl_error) {
+        $message = "Ошибка cURL: " . $curl_error;
     } else {
-        $hashed_pass = password_hash($pass, PASSWORD_DEFAULT);
+        $captcha_success = json_decode($response, true);
+        
+        // Отладочная информация (удалить после исправления)
+        if (empty($recaptcha_response)) {
+            $message = "reCAPTCHA не была пройдена. Ответ: " . $recaptcha_response;
+        } elseif (!$captcha_success || !isset($captcha_success['success'])) {
+            $message = "Ошибка ответа reCAPTCHA API. Ответ: " . $response;
+        } elseif (!$captcha_success['success']) {
+            $message = "Подтвердите, что вы не робот. Ошибки: " . implode(', ', $captcha_success['error-codes'] ?? []);
+        }
+    }
+    
+    // Проверка полей только если капча прошла успешно
+    if (empty($message) && (empty($first_name) || empty($last_name) || empty($phone) || empty($email) || empty($pass) || empty($repeatpass) || empty($address))) {
+        $message = "Заполните все поля";
+    } elseif (empty($message) && $pass !== $repeatpass) {
+        $message = "Пароли не совпадают";
+    } elseif (empty($message) && (strlen($pass) < 8 || !preg_match('/\d/', $pass))) {
+        $message = "Пароль должен содержать минимум 8 символов и хотя бы одну цифру";
+    } elseif (empty($message)) {
         $sql = "INSERT INTO users (first_name, last_name, phone, email, pass, address)
                 VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssss", $first_name, $last_name, $phone, $email, $hashed_pass, $address);
+        $stmt->bind_param("ssssss", $first_name, $last_name, $phone, $email, $pass, $address);
 
         if ($stmt->execute()) {
             $_SESSION['user_email'] = $email;
