@@ -1,3 +1,24 @@
+<?php
+require_once 'db.php';
+
+$sections = [
+  'Шашлык' => 12,
+  'Мясо птицы' => 13,
+  'Говядины' => 14
+];
+
+$data = [];
+foreach ($sections as $title => $categoryId) {
+  $stmt = $conn->prepare("SELECT id, name, original_price, image FROM products WHERE category_id = ? ORDER BY id DESC");
+  $stmt->bind_param("i", $categoryId);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  while ($row = $res->fetch_assoc()) {
+    $data[$title][] = $row;
+  }
+  $stmt->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -31,87 +52,30 @@
   </header>
 
   <main class = content>
-    <section class="category-section">
-  <div class="category-header">Шашлык</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/kebabchicken.jpg" alt="Шашлык куриный в маринаде">
-      <h3>Шашлык куриный в маринаде</h3>
-      <p>Цена: 980 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Шашлык куриный в маринаде">
-        <input type="hidden" name="price" value="980">
-        <input type="hidden" name="image" value="img/foodcatalog/kebabchicken.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/kebabcow.jpg" alt="Шашлык по-московски">
-      <h3>Шашлык по-московски</h3>
-      <p>Цена: 890 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Шашлык по-московски">
-        <input type="hidden" name="price" value="890">
-        <input type="hidden" name="image" value="img/foodcatalog/kebabcow.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-</section>
-<section class="category-section">
-  <div class="category-header">Мясо птицы</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/chicken.jpg" alt="Филе грудки">
-      <h3>Филе грудки</h3>
-      <p>Цена: 560 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Филе грудки">
-        <input type="hidden" name="price" value="560">
-        <input type="hidden" name="image" value="img/foodcatalog/chicken.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/chicken1.jpg" alt="Стейк из грудки">
-      <h3>Стейк из грудки</h3>
-      <p>Цена: 570 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Стейк из грудки">
-        <input type="hidden" name="price" value="570">
-        <input type="hidden" name="image" value="img/foodcatalog/chicken1.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-</section>
-<section class="category-section">
-  <div class="category-header">Говядины</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/stakeribai.jpg" alt="Стейк Рибай">
-      <h3>Стейк Рибай</h3>
-      <p>Цена: 1200 ₽</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Стейк Рибай">
-        <input type="hidden" name="price" value="1200">
-        <input type="hidden" name="image" value="img/foodcatalog/stakeribai.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/steikdenver.jpg" alt="Стейк Топ Блейд">
-      <h3>Стейк Топ Блейд</h3>
-      <p>Цена: 1350 ₽</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Стейк Топ Блейд">
-        <input type="hidden" name="price" value="1350">
-        <input type="hidden" name="image" value="img/foodcatalog/steikdenver.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-  </section>
+    <?php foreach ($data as $title => $items): ?>
+      <section class="category-section">
+        <div class="category-header"><?= htmlspecialchars($title) ?></div>
+        <div class="product-grid">
+          <?php if (empty($items)): ?>
+            <p style="padding: 12px;">Пока нет товаров в этой категории.</p>
+          <?php else: ?>
+            <?php foreach ($items as $p): ?>
+              <div class="product-card">
+                <img src="<?= htmlspecialchars($p['image']) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
+                <h3><?= htmlspecialchars($p['name']) ?></h3>
+                <p>Цена: <?= htmlspecialchars((string)intval($p['original_price'])) ?> ₽</p>
+                <form method="post" action="add_to_cart.php">
+                  <input type="hidden" name="product_name" value="<?= htmlspecialchars($p['name']) ?>">
+                  <input type="hidden" name="price" value="<?= htmlspecialchars($p['original_price']) ?>">
+                  <input type="hidden" name="image" value="<?= htmlspecialchars($p['image']) ?>">
+                  <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
+                </form>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+      </section>
+    <?php endforeach; ?>
   </main>
 
   <footer class="footer">

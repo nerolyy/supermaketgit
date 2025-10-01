@@ -1,5 +1,32 @@
+<?php
+require_once 'db.php';
+
+// Запросы к БД по категориям: 1 - Красная рыба, 2 - Белая рыба, 3 - Консервы
+$products_by_category = [
+  'Красная рыба' => [],
+  'Белая рыба' => [],
+  'Консервированная рыба' => []
+];
+
+$map = [
+  'Красная рыба' => 1,
+  'Белая рыба' => 2,
+  'Консервированная рыба' => 3
+];
+
+foreach ($map as $title => $categoryId) {
+  $stmt = $conn->prepare("SELECT id, name, original_price, image FROM products WHERE category_id = ? ORDER BY id DESC");
+  $stmt->bind_param("i", $categoryId);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  while ($row = $res->fetch_assoc()) {
+    $products_by_category[$title][] = $row;
+  }
+  $stmt->close();
+}
+?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ру">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,89 +58,30 @@
   </header>
 
   <main class = content>
-  <section class="category-section">
-  <div class="category-header">Красная рыба</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/losos.jpg" alt="Лосось">
-      <h3>Лосось</h3>
-      <p>Цена: 980 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Лосось">
-        <input type="hidden" name="price" value="980">
-        <input type="hidden" name="image" value="img/foodcatalog/losos.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/forel.jpg" alt="Форель">
-      <h3>Форель</h3>
-      <p>Цена: 890 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Форель">
-        <input type="hidden" name="price" value="890">
-        <input type="hidden" name="image" value="img/foodcatalog/forel.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<section class="category-section">
-  <div class="category-header">Белая рыба</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/treska.jpg" alt="Треска">
-      <h3>Треска</h3>
-      <p>Цена: 560 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Треска">
-        <input type="hidden" name="price" value="560">
-        <input type="hidden" name="image" value="img/foodcatalog/treska.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/piksha.jpg" alt="Пикша">
-      <h3>Пикша</h3>
-      <p>Цена: 470 ₽/кг</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Пикша">
-        <input type="hidden" name="price" value="470">
-        <input type="hidden" name="image" value="img/foodcatalog/piksha.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<section class="category-section">
-  <div class="category-header">Консервированная рыба</div>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="img/foodcatalog/tunec.jpg" alt="Тунец в масле">
-      <h3>Тунец в масле</h3>
-      <p>Цена: 120 ₽/банка</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Тунец в масле">
-        <input type="hidden" name="price" value="120">
-        <input type="hidden" name="image" value="img/foodcatalog/tunec.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-    <div class="product-card">
-      <img src="img/foodcatalog/sardina.jpg" alt="Сардины">
-      <h3>Сардины</h3>
-      <p>Цена: 85 ₽/банка</p>
-      <form method="post" action="add_to_cart.php">
-        <input type="hidden" name="product_name" value="Сардины">
-        <input type="hidden" name="price" value="85">
-        <input type="hidden" name="image" value="img/foodcatalog/sardina.jpg">
-        <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
-      </form>
-    </div>
-  </div>
-</section>
+  <?php foreach ($products_by_category as $title => $products): ?>
+    <section class="category-section">
+      <div class="category-header"><?= htmlspecialchars($title) ?></div>
+      <div class="product-grid">
+        <?php if (empty($products)): ?>
+          <p style="padding: 12px;">Пока нет товаров в этой категории.</p>
+        <?php else: ?>
+          <?php foreach ($products as $p): ?>
+            <div class="product-card">
+              <img src="<?= htmlspecialchars($p['image']) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
+              <h3><?= htmlspecialchars($p['name']) ?></h3>
+              <p>Цена: <?= htmlspecialchars((string)intval($p['original_price'])) ?> ₽</p>
+              <form method="post" action="add_to_cart.php">
+                <input type="hidden" name="product_name" value="<?= htmlspecialchars($p['name']) ?>">
+                <input type="hidden" name="price" value="<?= htmlspecialchars($p['original_price']) ?>">
+                <input type="hidden" name="image" value="<?= htmlspecialchars($p['image']) ?>">
+                <button type="submit" class="add-to-cart-button">Добавить в корзину</button>
+              </form>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+    </section>
+  <?php endforeach; ?>
 </main>
 
   <footer class="footer">
